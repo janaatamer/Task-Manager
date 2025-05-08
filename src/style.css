@@ -1,0 +1,100 @@
+/* Global Body Styling */
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif; /* Clean, modern font */
+    background-color: #f4f7fc; /* Light, subtle background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Container for Centering Content */
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* Form Styling */
+form {
+    background-color: white;
+    padding: 40px;
+    border-radius: 8px; /* Softer corners */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    width: 100%;
+    max-width: 380px; /* Slightly smaller width for a more focused feel */
+    text-align: center;
+    box-sizing: border-box;
+}
+
+/* Heading Styling */
+h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 30px;
+    letter-spacing: 0.5px;
+}
+
+/* Input Fields Styling */
+input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0; /* Lighter border for a more subtle look */
+    font-size: 16px;
+    background-color: #f9f9f9; /* Light background for the inputs */
+    color: #333;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input:focus {
+    border-color: #4C9BFF; /* Soft blue focus border */
+    box-shadow: 0 0 5px rgba(76, 155, 255, 0.5); /* Soft glow on focus */
+}
+
+/* Button Styling */
+button {
+    width: 100%;
+    padding: 14px;
+    background-color: #4C9BFF; /* Professional blue */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background-color: #357AE8; /* Darker blue on hover */
+}
+
+button:active {
+    transform: scale(0.98); /* Subtle effect on button press */
+}
+
+/* Responsive Design for Smaller Screens */
+@media (max-width: 480px) {
+    form {
+        padding: 25px;
+        max-width: 100%;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    input,
+    button {
+        font-size: 14px;
+        padding: 12px;
+    }
+}
