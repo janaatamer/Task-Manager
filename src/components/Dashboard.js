@@ -1,10 +1,10 @@
 import React from 'react';
-import './style.css'; // Local CSS
+import './Dashboard.css'; // Local CSS
 import '@fortawesome/fontawesome-free/css/all.min.css'; // Font Awesome if installed via npm
 
 function Dashboard() {
   return (
-    <div>
+    <div className="dashboard">
       {/* Navbar */}
       <nav className="navbar">
         <div className="logo">
