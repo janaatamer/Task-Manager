@@ -21,6 +21,7 @@ function Login() {
             try {
                 const user = await getCurrentUser();
                 console.log('User already authenticated:', user);
+                localStorage.setItem('authToken', user.signInDetails.loginId);
                 navigate('/dashboard');
                 return;
             } catch (error) {
@@ -34,6 +35,8 @@ function Login() {
             });
 
             console.log('Login result:', { isSignedIn, nextStep });
+            
+            localStorage.setItem('authToken', user.signInDetails.loginId);
 
             // Check authentication status again after sign in
             const user = await getCurrentUser();

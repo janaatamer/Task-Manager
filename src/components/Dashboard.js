@@ -1,8 +1,51 @@
 import React from 'react';
+import axios from 'axios';
+
+
 import './Dashboard.css'; // Local CSS
-import '@fortawesome/fontawesome-free/css/all.min.css'; // Font Awesome if installed via npm
+import '@fortawesome/fontawesome-free/css/all.min.css'; // Font Awesome
 
 function Dashboard() {
+const createTask = async (taskDetails, file) => {
+  const apiUrl = 'https://njkdm06i0e.execute-api.us-east-1.amazonaws.com/dev/create-task';
+  
+  // Assuming the token is stored in localStorage or cookies
+  const token = localStorage.getItem('authToken');  
+
+  const toBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result.split(',')[1]); // Get base64 string
+      reader.onerror = reject;
+    });
+
+  try {
+    // Convert the file to base64
+    const base64File = await toBase64(file);
+
+    const payload = {
+      task: taskDetails,
+      filename: file.name,  // Get the file name
+      file: base64File      // Send base64-encoded file
+    };
+
+    const response = await axios.post(apiUrl, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    console.log('Task created:', response.data);
+  } catch (error) {
+    console.error('Error creating task:', error);
+  }
+};
+
+
+
+ 
   return (
     <div className="dashboard">
       {/* Navbar */}
@@ -43,257 +86,95 @@ function Dashboard() {
             <i className="fa-solid fa-plus"></i> Add New Task
           </a>
         </div>
-        <div class="task-list">
 
-            <div class="task-card">
-                <div class="task-header">
-                    <h3>Complete project proposal</h3>
-                    <div class="task-actions">
-                        <a href="#edit-task-modal" class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></a>
-                        <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </div>
-                <div class="task-details">
-                    <p class="due-date"><i class="fa-solid fa-calendar"></i> Due: May 15, 2023</p>
-                    <div class="attachments">
-                        <p><i class="fa-solid fa-paperclip"></i> Attachments (2):</p>
-                        <div class="attachment-list">
-                            <span class="attachment-item">proposal-draft.docx</span>
-                            <span class="attachment-item">requirements.pdf</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="task-footer">
-                    <label class="checkbox-container">
-                        <input type="checkbox" />
-                        <span class="checkmark"></span>
-                        Mark as complete
-                    </label>
-                </div>
+        {/* Replace this with dynamic mapping later */}
+        <div className="task-list">
+          {/* Example Task Card */}
+          <div className="task-card">
+            <div className="task-header">
+              <h3>Complete project proposal</h3>
+              <div className="task-actions">
+                <a href="#edit-task-modal" className="edit-btn"><i className="fa-solid fa-pen-to-square"></i></a>
+                <button className="delete-btn"><i className="fa-solid fa-trash"></i></button>
+              </div>
             </div>
-
-
-            <div class="task-card">
-                <div class="task-header">
-                    <h3>Design team meeting</h3>
-                    <div class="task-actions">
-                        <a href="#edit-task-modal" class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></a>
-                        <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>
-                    </div>
+            <div className="task-details">
+              <p className="due-date"><i className="fa-solid fa-calendar"></i> Due: May 15, 2023</p>
+              <div className="attachments">
+                <p><i className="fa-solid fa-paperclip"></i> Attachments (2):</p>
+                <div className="attachment-list">
+                  <span className="attachment-item">proposal-draft.docx</span>
+                  <span className="attachment-item">requirements.pdf</span>
                 </div>
-                <div class="task-details">
-                    <p class="due-date"><i class="fa-solid fa-calendar"></i> Due: May 10, 2023</p>
-                    <div class="attachments">
-                        <p><i class="fa-solid fa-paperclip"></i> Attachments (1):</p>
-                        <div class="attachment-list">
-                            <span class="attachment-item">meeting-agenda.pdf</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="task-footer">
-                    <label class="checkbox-container">
-                        <input type="checkbox" />
-                        <span class="checkmark"></span>
-                        Mark as complete
-                    </label>
-                </div>
+              </div>
             </div>
-
-            <div class="task-card">
-                <div class="task-header">
-                    <h3>Update client documentation</h3>
-                    <div class="task-actions">
-                        <a href="#edit-task-modal" class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></a>
-                        <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </div>
-                <div class="task-details">
-                    <p class="due-date"><i class="fa-solid fa-calendar"></i> Due: May 20, 2023</p>
-                    <div class="attachments">
-                        <p><i class="fa-solid fa-paperclip"></i> Attachments (3):</p>
-                        <div class="attachment-list">
-                            <span class="attachment-item">user-guide.docx</span>
-                            <span class="attachment-item">api-docs.pdf</span>
-                            <span class="attachment-item">changelog.txt</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="task-footer">
-                    <label class="checkbox-container">
-                        <input type="checkbox"/>
-                        <span class="checkmark"></span>
-                        Mark as complete
-                    </label>
-                </div>
+            <div className="task-footer">
+              <label className="checkbox-container">
+                <input type="checkbox" />
+                <span className="checkmark"></span>
+                Mark as complete
+              </label>
             </div>
-
-       
-            <div class="task-card">
-                <div class="task-header">
-                    <h3>Prepare quarterly report</h3>
-                    <div class="task-actions">
-                        <a href="#edit-task-modal" class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></a>
-                        <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </div>
-                <div class="task-details">
-                    <p class="due-date"><i class="fa-solid fa-calendar"></i> Due: June 5, 2023</p>
-                    <div class="attachments">
-                        <p><i class="fa-solid fa-paperclip"></i> Attachments (0)</p>
-                    </div>
-                </div>
-                <div class="task-footer">
-                    <label class="checkbox-container">
-                        <input type="checkbox"/>
-                        <span class="checkmark"></span>
-                        Mark as complete
-                    </label>
-                </div>
-            </div>
-
-  
-            <div class="task-card">
-                <div class="task-header">
-                    <h3>Review code pull requests</h3>
-                    <div class="task-actions">
-                        <a href="#edit-task-modal" class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></a>
-                        <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </div>
-                <div class="task-details">
-                    <p class="due-date"><i class="fa-solid fa-calendar"></i> Due: May 12, 2023</p>
-                    <div class="attachments">
-                        <p><i class="fa-solid fa-paperclip"></i> Attachments (1):</p>
-                        <div class="attachment-list">
-                            <span class="attachment-item">code-review-checklist.pdf</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="task-footer">
-                    <label class="checkbox-container">
-                        <input type="checkbox" checked/>
-                        <span class="checkmark"></span>
-                        Mark as complete
-                    </label>
-                </div>
-            </div>
-
-            <div class="task-card">
-                <div class="task-header">
-                    <h3>Update website content</h3>
-                    <div class="task-actions">
-                        <a href="#edit-task-modal" class="edit-btn"><i class="fa-solid fa-pen-to-square"></i></a>
-                        <button class="delete-btn"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </div>
-                <div class="task-details">
-                    <p class="due-date"><i class="fa-solid fa-calendar"></i> Due: May 18, 2023</p>
-                    <div class="attachments">
-                        <p><i class="fa-solid fa-paperclip"></i> Attachments (2):</p>
-                        <div class="attachment-list">
-                            <span class="attachment-item">new-content.docx</span>
-                            <span class="attachment-item">images.zip</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="task-footer">
-                    <label class="checkbox-container">
-                        <input type="checkbox"/>
-                        <span class="checkmark"></span>
-                        Mark as complete
-                    </label>
-                </div>
-            </div>
+          </div>
+          {/* Add more task-cards similarly or use .map() */}
         </div>
-    </main>
+      </main>
 
-  
-    <div id="add-task-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Add New Task</h2>
-                <a href="#" class="close-modal">&times;</a>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="form-group">
-                        <label for="task-title">Title</label>
-                        <input type="text" id="task-title" placeholder="Enter task title" required/>
-                    </div>
-                    <div class="form-group">
-                        <label for="task-due-date">Due Date</label>
-                        <input type="date" id="task-due-date" required/>
-                    </div>
-                    <div class="form-group">
-                        <label for="task-attachments">Attachments</label>
-                        <div class="file-upload">
-                            <input type="file" id="task-attachments" multiple/>
-                            <label for="task-attachments" class="file-upload-label">
-                                <i class="fa-solid fa-paperclip"></i> Choose files
-                            </label>
-                        </div>
-                        <div class="selected-files">
-                            <p>No files selected</p>
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <a href="#" class="btn btn-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-primary">Add Task</button>
-                    </div>
-                </form>
-            </div>
+      {/* Add Task Modal */}
+      <div id="add-task-modal" className="modal">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h2>Add New Task</h2>
+            <a href="#" className="close-modal">&times;</a>
+          </div>
+          <div className="modal-body">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const taskDetails = {
+                title: e.target['task-title'].value,
+                dueDate: e.target['task-due-date'].value,
+              };
+              const file = e.target['task-attachments'].files[0];
+              createTask(taskDetails, file);
+            }}>
+              <div className="form-group">
+                <label htmlFor="task-title">Title</label>
+                <input type="text" id="task-title" placeholder="Enter task title" required />
+              </div>
+              <div className="form-group">
+                <label htmlFor="task-due-date">Due Date</label>
+                <input type="date" id="task-due-date" required />
+              </div>
+              <div className="form-group">
+                <label htmlFor="task-attachments">Attachments</label>
+                <div className="file-upload">
+                  <input type="file" id="task-attachments" />
+                  <label htmlFor="task-attachments" className="file-upload-label">
+                    <i className="fa-solid fa-paperclip"></i> Choose file
+                  </label>
+                </div>
+              </div>
+              <div className="form-actions">
+                <a href="#" className="btn btn-secondary">Cancel</a>
+                <button type="submit" className="btn btn-primary">Add Task</button>
+              </div>
+            </form>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <div id="edit-task-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Edit Task</h2>
-                <a href="#" class="close-modal">&times;</a>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="form-group">
-                        <label for="edit-task-title">Title</label>
-                        <input type="text" id="edit-task-title" value="Complete project proposal" required/>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-task-due-date">Due Date</label>
-                        <input type="date" id="edit-task-due-date" value="2023-05-15" required/>
-                    </div>
-                    <div class="form-group">
-                        <label>Current Attachments</label>
-                        <div class="current-attachments">
-                            <div class="attachment-item">
-                                <span>proposal-draft.docx</span>
-                                <button type="button" class="remove-attachment"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                            <div class="attachment-item">
-                                <span>requirements.pdf</span>
-                                <button type="button" class="remove-attachment"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-task-attachments">Add Attachments</label>
-                        <div class="file-upload">
-                            <input type="file" id="edit-task-attachments" multiple/>
-                            <label for="edit-task-attachments" class="file-upload-label">
-                                <i class="fa-solid fa-paperclip"></i> Choose files
-                            </label>
-                        </div>
-                        <div class="selected-files">
-                            <p>No files selected</p>
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <a href="#" class="btn btn-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </div>
-                </form>
-            </div>
+      {/* Edit Task Modal Placeholder */}
+      <div id="edit-task-modal" className="modal">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h2>Edit Task</h2>
+            <a href="#" className="close-modal">&times;</a>
+          </div>
+          <div className="modal-body">
+            <p>Edit functionality to be implemented...</p>
+          </div>
         </div>
-  </div>
+      </div>
     </div>
   );
 }
