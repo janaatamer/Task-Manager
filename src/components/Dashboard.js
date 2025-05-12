@@ -1,5 +1,6 @@
-import React from 'react';
+
 import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 
 
 import './Dashboard.css'; // Local CSS
@@ -43,6 +44,40 @@ const createTask = async (taskDetails, file) => {
   }
 };
 
+
+const getTasks = async () => {
+  const apiUrl = 'https://njkdm06i0e.execute-api.us-east-1.amazonaws.com/dev/get-task';
+  const token = localStorage.getItem('authToken');
+
+  try {
+    const response = await axios.get(apiUrl, {
+      headers: {
+        'Content-Type': 'application/json',
+        // Only add Authorization if token exists
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
+      // Optional: To be safe with CORS preflight
+      withCredentials: false
+    });
+
+    console.log('Tasks fetched:', response.data);
+    return response.data;
+
+  } catch (error) {
+    console.error('Error fetching tasks:', error.response?.data || error.message);
+    return [];
+  }
+};
+const [tasks, setTasks] = useState([]);
+
+useEffect(() => {
+  const fetchTasks = async () => {
+    const fetchedTasks = await getTasks();
+    setTasks(fetchedTasks);
+  };
+
+  fetchTasks();
+}, []);
 
 
  
@@ -88,36 +123,53 @@ const createTask = async (taskDetails, file) => {
         </div>
 
         {/* Replace this with dynamic mapping later */}
-        <div className="task-list">
-          {/* Example Task Card */}
-          <div className="task-card">
-            <div className="task-header">
-              <h3>Complete project proposal</h3>
-              <div className="task-actions">
-                <a href="#edit-task-modal" className="edit-btn"><i className="fa-solid fa-pen-to-square"></i></a>
-                <button className="delete-btn"><i className="fa-solid fa-trash"></i></button>
-              </div>
-            </div>
-            <div className="task-details">
-              <p className="due-date"><i className="fa-solid fa-calendar"></i> Due: May 15, 2023</p>
-              <div className="attachments">
-                <p><i className="fa-solid fa-paperclip"></i> Attachments (2):</p>
-                <div className="attachment-list">
-                  <span className="attachment-item">proposal-draft.docx</span>
-                  <span className="attachment-item">requirements.pdf</span>
-                </div>
-              </div>
-            </div>
-            <div className="task-footer">
-              <label className="checkbox-container">
-                <input type="checkbox" />
-                <span className="checkmark"></span>
-                Mark as complete
-              </label>
+<div className="task-list">
+  {tasks.map((task, index) => (
+    <div className="task-card" key={task.taskId || index}>
+      <div className="task-header">
+        <h3>{task.title}</h3>
+        <div className="task-actions">
+          <a href="#edit-task-modal" className="edit-btn">
+            <i className="fa-solid fa-pen-to-square"></i>
+          </a>
+          <button className="delete-btn">
+            <i className="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div className="task-details">
+        <p className="due-date">
+          <i className="fa-solid fa-calendar"></i> Due: {task.dueDate}
+        </p>
+        {task.attachmentUrl && (
+          <div className="attachments">
+            <p>
+              <i className="fa-solid fa-paperclip"></i> Attachment:
+            </p>
+            <div className="attachment-list">
+              <a
+                href={task.attachmentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="attachment-item"
+              >
+                View File
+              </a>
             </div>
           </div>
-          {/* Add more task-cards similarly or use .map() */}
-        </div>
+        )}
+      </div>
+      <div className="task-footer">
+        <label className="checkbox-container">
+          <input type="checkbox" defaultChecked={task.isDone} />
+          <span className="checkmark"></span>
+          Mark as complete
+        </label>
+      </div>
+    </div>
+  ))}
+</div>
+
       </main>
 
       {/* Add Task Modal */}
