@@ -8,6 +8,11 @@ import '@fortawesome/fontawesome-free/css/all.min.css'; // Font Awesome
 
 function Dashboard() {
     const [tasks, setTasks] = useState([]);
+    const [taskToEdit, setTaskToEdit] = useState(null); // stores the selected task
+    const [editFormData, setEditFormData] = useState({
+  title: '',
+  dueDate: ''
+});
 const createTask = async (taskDetails, file) => {
   const apiUrl = 'https://njkdm06i0e.execute-api.us-east-1.amazonaws.com/dev/create-task';
   
@@ -73,6 +78,45 @@ const getTasks = async () => {
   }
 };
 
+const editTask = async (taskId, updatedTaskDetails) => {
+  const apiUrl = 'https://njkdm06i0e.execute-api.us-east-1.amazonaws.com/dev/UpdateTask';
+  const token = localStorage.getItem('authToken');
+
+  try {
+    // Prepare the update fields (e.g., title, dueDate, etc.)
+    const updateFields = {};
+
+    if (updatedTaskDetails.title) {
+      updateFields.title = updatedTaskDetails.title;
+    }
+    if (updatedTaskDetails.dueDate) {
+      updateFields.dueDate = updatedTaskDetails.dueDate;
+    }
+    // You can add other fields like file if necessary here
+
+    // Create the payload for the request
+    const payload = {
+      taskId: taskId,
+      updateFields: updateFields,  // Send updateFields instead of taskDetails
+      file: updatedTaskDetails.file || null,  // Send file if it exists
+      filename: updatedTaskDetails.filename || null,  // Send filename if it exists
+    };
+
+    // Send the request to the API with headers and payload
+    const response = await axios.put(apiUrl, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    console.log('Task updated:', response.data);
+  } catch (error) {
+    console.error('Error editing task:', error.response?.data || error.message);
+  }
+};
+
+
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -86,6 +130,38 @@ const getTasks = async () => {
     fetchTasks(); // Actually fetch the tasks
 
   }, []); // Empty dependency array to only fetch tasks once on component mount
+
+  const updateTaskStatus = async (taskId, newStatus) => {
+  const apiUrl = 'https://njkdm06i0e.execute-api.us-east-1.amazonaws.com/dev/UpdateTask';
+  const token = localStorage.getItem('authToken');
+
+  try {
+    const payload = {
+      taskId: taskId,
+      updateFields: {
+        isDone: newStatus,  // Update isDone to the new status
+      },
+    };
+
+    const response = await axios.put(apiUrl, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    console.log('Task status updated:', response.data);
+    
+    // After updating the task status, fetch the updated tasks
+    const updatedTasks = await getTasks();  // This is the function to get all tasks
+    setTasks(JSON.parse(updatedTasks.body));  // Update tasks state with the new data
+    console.log(JSON.parse(updatedTasks.body));
+
+  } catch (error) {
+    console.error('Error updating task status:', error);
+  }
+};
+
 
   useEffect(() => {
     console.log('Updated tasks:', tasks); // This logs when tasks state changes
@@ -147,9 +223,20 @@ const getTasks = async () => {
         <div className="task-header">
           <h3>{details.title || details.name}</h3>
           <div className="task-actions">
-            <a href="#edit-task-modal" className="edit-btn">
-              <i className="fa-solid fa-pen-to-square"></i>
-            </a>
+            <a
+  href="#edit-task-modal"
+  className="edit-btn"
+  onClick={() => {
+    const details = JSON.parse(task.taskDetails);
+    setTaskToEdit(task);
+    setEditFormData({
+      title: details.title || '',
+      dueDate: details.dueDate || ''
+    });
+  }}
+>
+  <i className="fa-solid fa-pen-to-square"></i>
+</a>
             <button className="delete-btn">
               <i className="fa-solid fa-trash"></i>
             </button>
@@ -178,12 +265,19 @@ const getTasks = async () => {
           )}
         </div>
         <div className="task-footer">
-          <label className="checkbox-container">
-            <input type="checkbox" defaultChecked={details.isDone} />
-            <span className="checkmark"></span>
-            Mark as complete
-          </label>
-        </div>
+  <label className="checkbox-container">
+    <input
+      type="checkbox"
+      checked={details.isDone}  // Use the isDone value to check the box
+      onChange={async () => {
+        await updateTaskStatus(task.taskId, !details.isDone); 
+         // Toggle isDone value
+      }}
+    />
+    <span className="checkmark"></span>
+    {details.isDone ? "Completed" : "Mark as complete"}  {/* Display text based on isDone */}
+  </label>
+</div>
       </div>
     );
   })}
@@ -237,16 +331,78 @@ const getTasks = async () => {
 
       {/* Edit Task Modal Placeholder */}
       <div id="edit-task-modal" className="modal">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h2>Edit Task</h2>
-            <a href="#" className="close-modal">&times;</a>
+  <div className="modal-content">
+    <div className="modal-header">
+      <h2>Edit Task</h2>
+      <a href="#" className="close-modal">&times;</a>
+    </div>
+    <div className="modal-body">
+      {/* {taskToEdit ? ( */}
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const updatedTask = {
+              title: editFormData.title,
+              dueDate: editFormData.dueDate
+            };
+
+            await editTask(taskToEdit.taskId, updatedTask);
+            const updatedTasks = await getTasks(); // Refresh task list
+            setTasks(JSON.parse(updatedTasks.body));
+            setTaskToEdit(null); // Reset state
+          }}
+        >
+          <div className="form-group">
+            <label htmlFor="edit-title">Title</label>
+            <input
+              id="edit-title"
+              value={editFormData.title}
+              onChange={(e) =>
+                setEditFormData({ ...editFormData, title: e.target.value })
+              }
+              required
+            />
           </div>
-          <div className="modal-body">
-            <p>Edit functionality to be implemented...</p>
+          <div className="form-group">
+            <label htmlFor="edit-due-date">Due Date</label>
+            <input
+              id="edit-due-date"
+              type="date"
+              value={editFormData.dueDate}
+              onChange={(e) =>
+                setEditFormData({ ...editFormData, dueDate: e.target.value })
+              }
+              required
+            />
+            
           </div>
-        </div>
-      </div>
+          <div className="form-group">
+          <label htmlFor="edit-file">Attach File</label>
+          <input
+            id="edit-file"
+            type="file"
+            onChange={(e) =>
+              setEditFormData({ ...editFormData, file: e.target.files[0] })
+            }
+          />
+          </div>
+          <div className="form-actions">
+            <a href="#" className="btn btn-secondary" onClick={() => setTaskToEdit(null)}>
+              Cancel
+            </a>
+            <button type="submit" className="btn btn-primary">
+              Save Changes
+            </button>
+          </div>
+        </form>
+      {/* ) 
+      : (
+        <p>No task selected</p>
+      )
+      } */}
+    </div>
+  </div>
+</div>
     </div>
   );
 }
