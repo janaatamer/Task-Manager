@@ -7,6 +7,7 @@ import './Dashboard.css'; // Local CSS
 import '@fortawesome/fontawesome-free/css/all.min.css'; // Font Awesome
 
 function Dashboard() {
+    const [tasks, setTasks] = useState([]);
 const createTask = async (taskDetails, file) => {
   const apiUrl = 'https://njkdm06i0e.execute-api.us-east-1.amazonaws.com/dev/create-task';
   
@@ -50,11 +51,14 @@ const getTasks = async () => {
   const token = localStorage.getItem('authToken');
 
   try {
+    console.log('tokenn', token);
     const response = await axios.get(apiUrl, {
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
         // Only add Authorization if token exists
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        // ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        
       },
       // Optional: To be safe with CORS preflight
       withCredentials: false
@@ -68,17 +72,28 @@ const getTasks = async () => {
     return [];
   }
 };
-const [tasks, setTasks] = useState([]);
 
-useEffect(() => {
-  const fetchTasks = async () => {
-    const fetchedTasks = await getTasks();
-    setTasks(fetchedTasks);
-  };
 
-  fetchTasks();
-}, []);
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const fetchedTasks = await getTasks();
+      console.log('Fetched Tasks:', fetchedTasks); // Debugging: Check the full fetched data
+      // Parse the 'body' as it is returned as a JSON string
+      const parsedTasks = JSON.parse(fetchedTasks.body); // Parse the string to an array
+      setTasks(parsedTasks); // Set the parsed array to state
+    };
 
+    fetchTasks(); // Actually fetch the tasks
+
+  }, []); // Empty dependency array to only fetch tasks once on component mount
+
+  useEffect(() => {
+    console.log('Updated tasks:', tasks); // This logs when tasks state changes
+    console.log('Is tasks an array?', Array.isArray(tasks)); // Check if it's an array
+  }, [tasks]); // This effect runs when tasks are updated
+
+
+  
 
  
   return (
@@ -124,51 +139,56 @@ useEffect(() => {
 
         {/* Replace this with dynamic mapping later */}
 <div className="task-list">
-  {tasks.map((task, index) => (
-    <div className="task-card" key={task.taskId || index}>
-      <div className="task-header">
-        <h3>{task.title}</h3>
-        <div className="task-actions">
-          <a href="#edit-task-modal" className="edit-btn">
-            <i className="fa-solid fa-pen-to-square"></i>
-          </a>
-          <button className="delete-btn">
-            <i className="fa-solid fa-trash"></i>
-          </button>
+  {Array.isArray(tasks) && tasks.map((task, index) => {
+    const details = JSON.parse(task.taskDetails);  // 👈 Parse the string
+
+    return ( // ✅ Return JSX
+      <div className="task-card" key={task.taskId || index}>
+        <div className="task-header">
+          <h3>{details.title || details.name}</h3>
+          <div className="task-actions">
+            <a href="#edit-task-modal" className="edit-btn">
+              <i className="fa-solid fa-pen-to-square"></i>
+            </a>
+            <button className="delete-btn">
+              <i className="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div className="task-details">
+          <p className="due-date">
+            <i className="fa-solid fa-calendar"></i> Due: {details.dueDate || 'No due date'}
+          </p>
+          {task.fileUrl && (
+            <div className="attachments">
+              <p>
+                <i className="fa-solid fa-paperclip"></i> Attachment:
+              </p>
+              <div className="attachment-list">
+                <a
+                  href={task.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="attachment-item"
+                >
+                  View File
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="task-footer">
+          <label className="checkbox-container">
+            <input type="checkbox" defaultChecked={details.isDone} />
+            <span className="checkmark"></span>
+            Mark as complete
+          </label>
         </div>
       </div>
-      <div className="task-details">
-        <p className="due-date">
-          <i className="fa-solid fa-calendar"></i> Due: {task.dueDate}
-        </p>
-        {task.attachmentUrl && (
-          <div className="attachments">
-            <p>
-              <i className="fa-solid fa-paperclip"></i> Attachment:
-            </p>
-            <div className="attachment-list">
-              <a
-                href={task.attachmentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="attachment-item"
-              >
-                View File
-              </a>
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="task-footer">
-        <label className="checkbox-container">
-          <input type="checkbox" defaultChecked={task.isDone} />
-          <span className="checkmark"></span>
-          Mark as complete
-        </label>
-      </div>
-    </div>
-  ))}
+    );
+  })}
 </div>
+
 
       </main>
 
