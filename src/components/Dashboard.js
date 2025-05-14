@@ -56,7 +56,7 @@ const getTasks = async () => {
   const token = localStorage.getItem('authToken');
 
   try {
-    console.log('tokenn', token);
+   // console.log('tokenn', token);
     const response = await axios.get(apiUrl, {
       headers: {
         'Content-Type': 'application/json',

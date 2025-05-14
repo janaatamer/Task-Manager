@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signIn, getCurrentUser } from 'aws-amplify/auth';
+import { signIn, getCurrentUser, signOut } from 'aws-amplify/auth';
 import '../style.css';
 
 function Login() {
@@ -21,11 +21,21 @@ function Login() {
             try {
                 const user = await getCurrentUser();
                 console.log('User already authenticated:', user);
-                localStorage.setItem('authToken', user.signInDetails.loginId);
-                navigate('/dashboard');
-                return;
+                
+                // If the authenticated user is different from the one trying to log in
+                if (user.signInDetails.loginId !== email) {
+                    await signOut(); // Sign out the current user
+                    console.log('Signed out previous user');
+                } else {
+                    // Same user, just redirect to dashboard
+                    localStorage.setItem('authToken', user.signInDetails.loginId);
+                    console.log('same user:', user.signInDetails.loginId)
+                    navigate('/dashboard');
+                    return;
+                }
             } catch (error) {
                 // Not authenticated, proceed with sign in
+                console.log('No user currently authenticated');
             }
 
             // Perform sign in
@@ -36,23 +46,27 @@ function Login() {
 
             console.log('Login result:', { isSignedIn, nextStep });
             
-            localStorage.setItem('authToken', user.signInDetails.loginId);
-
-            // Check authentication status again after sign in
+            // Get the current user after successful sign in
             const user = await getCurrentUser();
             if (user) {
+                localStorage.setItem('authToken', user.signInDetails.loginId);
+                console.log('another user',user.signInDetails.loginId)
+                
+                // Handle special cases
+                if (nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
+                    navigate('/new-password', { state: { username: email } });
+                    return;
+                } else if (nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_SMS_CODE') {
+                    navigate('/confirm-signin', { state: { username: email } });
+                    return;
+                }
+                
+                // Regular successful login
                 navigate('/dashboard');
                 return;
             }
 
-            // Handle special cases if not authenticated
-            if (nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
-                navigate('/new-password', { state: { username: email } });
-            } else if (nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_SMS_CODE') {
-                navigate('/confirm-signin', { state: { username: email } });
-            } else {
-                setError('Authentication successful but unable to redirect');
-            }
+            setError('Authentication successful but unable to redirect');
         } catch (error) {
             console.error('Error signing in:', error);
             let errorMessage = 'Login failed. Please check your credentials.';
@@ -129,32 +143,29 @@ function Login() {
                     </button>
                 </form>
                 
-                {/* Replace the auth-links div with this: */}
-<div className="auth-footer">
-  <a 
-    href="/forgot-password" 
-    className="footer-link"
-    onClick={(e) => {
-      e.preventDefault();
-      navigate('/forgot-password');
-    }}
-  >
-    Forgot password?
-  </a>
-  <span className="divider">|</span>
-    <a 
-    href="/signup" 
-    className="footer-link"
-    onClick={(e) => {
-      e.preventDefault();
-      navigate('/signup');
-    }}
-     >
-      Create account
-  </a>
-  </div>
-               
-
+                <div className="auth-footer">
+                    <a 
+                        href="/forgot-password" 
+                        className="footer-link"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            navigate('/forgot-password');
+                        }}
+                    >
+                        Forgot password?
+                    </a>
+                    <span className="divider">|</span>
+                    <a 
+                        href="/signup" 
+                        className="footer-link"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            navigate('/signup');
+                        }}
+                    >
+                        Create account
+                    </a>
+                </div>
             </div>
         </div>
     );
