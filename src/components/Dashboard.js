@@ -162,7 +162,28 @@ const editTask = async (taskId, updatedTaskDetails) => {
   }
 };
 
+  // ✅ DELETE TASK FUNCTION
+  const deleteTask = async (taskId) => {
+    const apiUrl = `hhttps://njkdm06i0e.execute-api.us-east-1.amazonaws.com/dev/delete-task/${taskId}`;
+    const token = localStorage.getItem('authToken');
 
+    try {
+      const response = await axios.delete(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      console.log('Task deleted:', response.data);
+
+      // Refresh the task list
+      const updatedTasks = await getTasks();
+      setTasks(JSON.parse(updatedTasks.body));
+
+    } catch (error) {
+      console.error('Error deleting task:', error.response?.data || error.message);
+    }
+  };
   useEffect(() => {
     console.log('Updated tasks:', tasks); // This logs when tasks state changes
     console.log('Is tasks an array?', Array.isArray(tasks)); // Check if it's an array
@@ -172,239 +193,233 @@ const editTask = async (taskId, updatedTaskDetails) => {
   
 
  
-  return (
-    <div className="dashboard">
-      {/* Navbar */}
-      <nav className="navbar">
-        <div className="logo">
-          <h1>TaskManager</h1>
+return (
+  <div className="dashboard">
+    {/* Navbar */}
+    <nav className="navbar">
+      <div className="logo">
+        <h1>TaskManager</h1>
+      </div>
+      <div className="nav-links">
+        <div className="notification">
+          <i className="fa-solid fa-bell"></i>
+          <span className="notification-badge">3</span>
         </div>
-        <div className="nav-links">
-          <div className="notification">
-            <i className="fa-solid fa-bell"></i>
-            <span className="notification-badge">3</span>
-          </div>
-          <div className="profile">
-            <img src="" alt="Profile" />
-            <div className="profile-dropdown">
-              <div className="profile-info">
-                <img src="" alt="Profile" />
-                <div>
-                  <h3>John Doe</h3>
-                  <p>john.doe@example.com</p>
-                </div>
+        <div className="profile">
+          <img src="" alt="Profile" />
+          <div className="profile-dropdown">
+            <div className="profile-info">
+              <img src="" alt="Profile" />
+              <div>
+                <h3>John Doe</h3>
+                <p>john.doe@example.com</p>
               </div>
-              <ul>
-                <li><a href="#"><i className="fa-solid fa-user"></i> My Profile</a></li>
-                <li><a href="#"><i className="fa-solid fa-gear"></i> Settings</a></li>
-                <li><a href="#"><i className="fa-solid fa-sign-out-alt"></i> Logout</a></li>
-              </ul>
             </div>
+            <ul>
+              <li><a href="#"><i className="fa-solid fa-user"></i> My Profile</a></li>
+              <li><a href="#"><i className="fa-solid fa-gear"></i> Settings</a></li>
+              <li><a href="#"><i className="fa-solid fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
           </div>
         </div>
-      </nav>
+      </div>
+    </nav>
 
-      {/* Main Content */}
-      <main className="container">
-        <div className="header">
-          <h1>My Tasks</h1>
-          <a href="#add-task-modal" className="btn add-task-btn">
-            <i className="fa-solid fa-plus"></i> Add New Task
-          </a>
-        </div>
+    {/* Main Content */}
+    <main className="container">
+      <div className="header">
+        <h1>My Tasks</h1>
+        <a href="#add-task-modal" className="btn add-task-btn">
+          <i className="fa-solid fa-plus"></i> Add New Task
+        </a>
+      </div>
 
-        {/* Replace this with dynamic mapping later */}
-<div className="task-list">
-  {Array.isArray(tasks) && tasks.map((task, index) => {
-    const details = JSON.parse(task.taskDetails);  // 👈 Parse the string
-
-    return ( // ✅ Return JSX
-      <div className="task-card" key={task.taskId || index}>
-        <div className="task-header">
-          <h3>{details.title || details.name}</h3>
-          <div className="task-actions">
-            <a
-  href="#edit-task-modal"
-  className="edit-btn"
-  onClick={() => {
-    const details = JSON.parse(task.taskDetails);
-    setTaskToEdit(task);
-    setEditFormData({
-      title: details.title || '',
-      dueDate: details.dueDate || ''
-    });
+      {/* ✅ Task List */}
+      <div className="task-list">
+        {Array.isArray(tasks) && tasks.map((task, index) => {
+          const details = JSON.parse(task.taskDetails);
+          return (
+            <div className="task-card" key={task.taskId || index}>
+              <div className="task-header">
+                <h3>{details.title || details.name}</h3>
+                <div className="task-actions">
+                  <a
+                    href="#edit-task-modal"
+                    className="edit-btn"
+                    onClick={() => {
+                      setTaskToEdit(task);
+                      setEditFormData({
+                        title: details.title || '',
+                        dueDate: details.dueDate || ''
+                      });
+                    }}
+                  >
+                    <i className="fa-solid fa-pen-to-square"></i>
+                  </a>
+                 <button
+  className="delete-btn"
+  onClick={async () => {
+    if (window.confirm("Are you sure you want to delete this task?")) {
+      await deleteTask(task.taskId);
+      setTasks(prevTasks => prevTasks.filter(t => t.taskId !== task.taskId));
+    }
   }}
 >
-  <i className="fa-solid fa-pen-to-square"></i>
-</a>
-            <button className="delete-btn">
-              <i className="fa-solid fa-trash"></i>
-            </button>
-          </div>
-        </div>
-        <div className="task-details">
-          <p className="due-date">
-            <i className="fa-solid fa-calendar"></i> Due: {details.dueDate || 'No due date'}
-          </p>
-          {task.fileUrl && (
-            <div className="attachments">
-              <p>
-                <i className="fa-solid fa-paperclip"></i> Attachment:
-              </p>
-              <div className="attachment-list">
-                <a
-                  href={task.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="attachment-item"
-                >
-                  View File
-                </a>
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="task-footer">
-  <label className="checkbox-container">
-    <input
-      type="checkbox"
-      checked={details.isDone}  // Use the isDone value to check the box
-      onChange={async () => {
-        await updateTaskStatus(task.taskId, !details.isDone); 
-         // Toggle isDone value
-      }}
-    />
-    <span className="checkmark"></span>
-    {details.isDone ? "Completed" : "Mark as complete"}  {/* Display text based on isDone */}
-  </label>
-</div>
-      </div>
-    );
-  })}
-</div>
+  <i className="fa-solid fa-trash"></i>
+</button>
 
-
-      </main>
-
-      {/* Add Task Modal */}
-      <div id="add-task-modal" className="modal">
-        <div className="modal-content">
-          <div className="modal-header">
-            <h2>Add New Task</h2>
-            <a href="#" className="close-modal">&times;</a>
-          </div>
-          <div className="modal-body">
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const taskDetails = {
-                title: e.target['task-title'].value,
-                dueDate: e.target['task-due-date'].value,
-              };
-              const file = e.target['task-attachments'].files[0];
-              createTask(taskDetails, file);
-            }}>
-              <div className="form-group">
-                <label htmlFor="task-title">Title</label>
-                <input type="text" id="task-title" placeholder="Enter task title" required />
-              </div>
-              <div className="form-group">
-                <label htmlFor="task-due-date">Due Date</label>
-                <input type="date" id="task-due-date" required />
-              </div>
-              <div className="form-group">
-                <label htmlFor="task-attachments">Attachments</label>
-                <div className="file-upload">
-                  <input type="file" id="task-attachments" />
-                  <label htmlFor="task-attachments" className="file-upload-label">
-                    <i className="fa-solid fa-paperclip"></i> Choose file
-                  </label>
                 </div>
               </div>
-              <div className="form-actions">
-                <a href="#" className="btn btn-secondary">Cancel</a>
-                <button type="submit" className="btn btn-primary">Add Task</button>
+              <div className="task-details">
+                <p className="due-date">
+                  <i className="fa-solid fa-calendar"></i> Due: {details.dueDate || 'No due date'}
+                </p>
+                {task.fileUrl && (
+                  <div className="attachments">
+                    <p><i className="fa-solid fa-paperclip"></i> Attachment:</p>
+                    <div className="attachment-list">
+                      <a
+                        href={task.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="attachment-item"
+                      >
+                        View File
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
-            </form>
-          </div>
+              <div className="task-footer">
+                <label className="checkbox-container">
+                  <input
+                    type="checkbox"
+                    checked={details.isDone}
+                    onChange={async () => {
+                      await updateTaskStatus(task.taskId, !details.isDone);
+                    }}
+                  />
+                  <span className="checkmark"></span>
+                  {details.isDone ? "Completed" : "Mark as complete"}
+                </label>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </main>
+
+    {/* Add Task Modal */}
+    <div id="add-task-modal" className="modal">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h2>Add New Task</h2>
+          <a href="#" className="close-modal">&times;</a>
+        </div>
+        <div className="modal-body">
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const taskDetails = {
+              title: e.target['task-title'].value,
+              dueDate: e.target['task-due-date'].value,
+            };
+            const file = e.target['task-attachments'].files[0];
+            createTask(taskDetails, file);
+          }}>
+            <div className="form-group">
+              <label htmlFor="task-title">Title</label>
+              <input type="text" id="task-title" required />
+            </div>
+            <div className="form-group">
+              <label htmlFor="task-due-date">Due Date</label>
+              <input type="date" id="task-due-date" required />
+            </div>
+            <div className="form-group">
+              <label htmlFor="task-attachments">Attachments</label>
+              <div className="file-upload">
+                <input type="file" id="task-attachments" />
+                <label htmlFor="task-attachments" className="file-upload-label">
+                  <i className="fa-solid fa-paperclip"></i> Choose file
+                </label>
+              </div>
+            </div>
+            <div className="form-actions">
+              <a href="#" className="btn btn-secondary">Cancel</a>
+              <button type="submit" className="btn btn-primary">Add Task</button>
+            </div>
+          </form>
         </div>
       </div>
-
-      {/* Edit Task Modal Placeholder */}
-      <div id="edit-task-modal" className="modal">
-  <div className="modal-content">
-    <div className="modal-header">
-      <h2>Edit Task</h2>
-      <a href="#" className="close-modal">&times;</a>
     </div>
-    <div className="modal-body">
-      {/* {taskToEdit ? ( */}
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const updatedTask = {
-              title: editFormData.title,
-              dueDate: editFormData.dueDate
-            };
 
-            await editTask(taskToEdit.taskId, updatedTask);
-            const updatedTasks = await getTasks(); // Refresh task list
-            setTasks(JSON.parse(updatedTasks.body));
-            setTaskToEdit(null); // Reset state
-          }}
-        >
-          <div className="form-group">
-            <label htmlFor="edit-title">Title</label>
-            <input
-              id="edit-title"
-              value={editFormData.title}
-              onChange={(e) =>
-                setEditFormData({ ...editFormData, title: e.target.value })
-              }
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="edit-due-date">Due Date</label>
-            <input
-              id="edit-due-date"
-              type="date"
-              value={editFormData.dueDate}
-              onChange={(e) =>
-                setEditFormData({ ...editFormData, dueDate: e.target.value })
-              }
-              required
-            />
-            
-          </div>
-          <div className="form-group">
-          <label htmlFor="edit-file">Attach File</label>
-          <input
-            id="edit-file"
-            type="file"
-            onChange={(e) =>
-              setEditFormData({ ...editFormData, file: e.target.files[0] })
-            }
-          />
-          </div>
-          <div className="form-actions">
-            <a href="#" className="btn btn-secondary" onClick={() => setTaskToEdit(null)}>
-              Cancel
-            </a>
-            <button type="submit" className="btn btn-primary">
-              Save Changes
-            </button>
-          </div>
-        </form>
-      {/* ) 
-      : (
-        <p>No task selected</p>
-      )
-      } */}
+    {/* Edit Task Modal */}
+    <div id="edit-task-modal" className="modal">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h2>Edit Task</h2>
+          <a href="#" className="close-modal">&times;</a>
+        </div>
+        <div className="modal-body">
+          {taskToEdit ? (
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const updatedTask = {
+                  title: editFormData.title,
+                  dueDate: editFormData.dueDate,
+                };
+                await editTask(taskToEdit.taskId, updatedTask);
+                const updatedTasks = await getTasks();
+                setTasks(JSON.parse(updatedTasks.body));
+                setTaskToEdit(null);
+              }}
+            >
+              <div className="form-group">
+                <label htmlFor="edit-title">Title</label>
+                <input
+                  id="edit-title"
+                  value={editFormData.title}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, title: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="edit-due-date">Due Date</label>
+                <input
+                  id="edit-due-date"
+                  type="date"
+                  value={editFormData.dueDate}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, dueDate: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="edit-file">Attach File</label>
+                <input
+                  id="edit-file"
+                  type="file"
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, file: e.target.files[0] })
+                  }
+                />
+              </div>
+              <div className="form-actions">
+                <a href="#" className="btn btn-secondary" onClick={() => setTaskToEdit(null)}>Cancel</a>
+                <button type="submit" className="btn btn-primary">Save Changes</button>
+              </div>
+            </form>
+          ) : (
+            <p>No task selected</p>
+          )}
+        </div>
+      </div>
     </div>
   </div>
-</div>
-    </div>
-  );
-}
+);}
+
 
 export default Dashboard;
