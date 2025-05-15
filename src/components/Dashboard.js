@@ -164,14 +164,15 @@ const editTask = async (taskId, updatedTaskDetails) => {
 
   // ✅ DELETE TASK FUNCTION
 const deleteTask = async (taskId) => {
-  const apiUrl = `https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks/${taskId}`;
-  const token = localStorage.getItem('authToken');
+  const apiUrl = `https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks/?taskId=${taskId}`;
 
+
+  const token = localStorage.getItem('authToken');
   try {
     const response = await axios.delete(apiUrl, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+         'Authorization': `Bearer ${token}`,
       },
     });
 
