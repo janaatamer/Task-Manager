@@ -14,7 +14,7 @@ function Dashboard() {
   dueDate: ''
 });
 const createTask = async (taskDetails, file) => {
-  const apiUrl = 'https://njkdm06i0e.execute-api.us-east-1.amazonaws.com/dev/create-task';
+  const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
   
   // Assuming the token is stored in localStorage or cookies
   const token = localStorage.getItem('authToken');  
@@ -52,7 +52,7 @@ const createTask = async (taskDetails, file) => {
 
 
 const getTasks = async () => {
-  const apiUrl = 'https://njkdm06i0e.execute-api.us-east-1.amazonaws.com/dev/get-task';
+  const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
   const token = localStorage.getItem('authToken');
 
   try {
@@ -79,7 +79,7 @@ const getTasks = async () => {
 };
 
 const editTask = async (taskId, updatedTaskDetails) => {
-  const apiUrl = 'https://njkdm06i0e.execute-api.us-east-1.amazonaws.com/dev/UpdateTask';
+  const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
   const token = localStorage.getItem('authToken');
 
   try {
@@ -132,7 +132,7 @@ const editTask = async (taskId, updatedTaskDetails) => {
   }, []); // Empty dependency array to only fetch tasks once on component mount
 
   const updateTaskStatus = async (taskId, newStatus) => {
-  const apiUrl = 'https://njkdm06i0e.execute-api.us-east-1.amazonaws.com/dev/UpdateTask';
+  const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
   const token = localStorage.getItem('authToken');
 
   try {
@@ -163,22 +163,23 @@ const editTask = async (taskId, updatedTaskDetails) => {
 };
 
   // ✅ DELETE TASK FUNCTION
-  const deleteTask = async (taskId) => {
-    const apiUrl = `hhttps://njkdm06i0e.execute-api.us-east-1.amazonaws.com/dev/delete-task/${taskId}`;
-    const token = localStorage.getItem('authToken');
+const deleteTask = async (taskId) => {
+  const apiUrl = `https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks/${taskId}`;
+  const token = localStorage.getItem('authToken');
 
-    try {
-      const response = await axios.delete(apiUrl, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+  try {
+    const response = await axios.delete(apiUrl, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
 
       console.log('Task deleted:', response.data);
 
       // Refresh the task list
-      const updatedTasks = await getTasks();
-      setTasks(JSON.parse(updatedTasks.body));
+    //  const updatedTasks = await getTasks();
+    //  setTasks(JSON.parse(updatedTasks.body));
 
     } catch (error) {
       console.error('Error deleting task:', error.response?.data || error.message);
@@ -261,7 +262,7 @@ return (
   onClick={async () => {
     if (window.confirm("Are you sure you want to delete this task?")) {
       await deleteTask(task.taskId);
-      setTasks(prevTasks => prevTasks.filter(t => t.taskId !== task.taskId));
+    //  setTasks(prevTasks => prevTasks.filter(t => t.taskId !== task.taskId));
     }
   }}
 >
