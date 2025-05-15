@@ -13,6 +13,8 @@ function Dashboard() {
   title: '',
   dueDate: ''
 });
+  const [token,setToken] = useState('');
+
 const createTask = async (taskDetails, file) => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
   
@@ -53,10 +55,11 @@ const createTask = async (taskDetails, file) => {
 
 const getTasks = async () => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
-  const token = localStorage.getItem('authToken');
+//  const token = localStorage.getItem('authToken');
 
   try {
-   // console.log('tokenn', token);
+
+    //console.log('tokenn', token);
     const response = await axios.get(apiUrl, {
       headers: {
         'Content-Type': 'application/json',
@@ -80,9 +83,10 @@ const getTasks = async () => {
 
 const editTask = async (taskId, updatedTaskDetails) => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
-  const token = localStorage.getItem('authToken');
-
+  
   try {
+    console.log('tokenn', token);
+
     // Prepare the update fields (e.g., title, dueDate, etc.)
     const updateFields = {};
 
@@ -100,6 +104,7 @@ const editTask = async (taskId, updatedTaskDetails) => {
       updateFields: updateFields,  // Send updateFields instead of taskDetails
       file: updatedTaskDetails.file || null,  // Send file if it exists
       filename: updatedTaskDetails.filename || null,  // Send filename if it exists
+      token
     };
 
     // Send the request to the API with headers and payload
@@ -120,6 +125,8 @@ const editTask = async (taskId, updatedTaskDetails) => {
 
   useEffect(() => {
     const fetchTasks = async () => {
+      const token = localStorage.getItem('authToken');
+      setToken(token);
       const fetchedTasks = await getTasks();
       console.log('Fetched Tasks:', fetchedTasks); // Debugging: Check the full fetched data
       // Parse the 'body' as it is returned as a JSON string
@@ -133,9 +140,10 @@ const editTask = async (taskId, updatedTaskDetails) => {
 
   const updateTaskStatus = async (taskId, newStatus) => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
-  const token = localStorage.getItem('authToken');
+ // const token = localStorage.getItem('authToken');
 
   try {
+    console.log(token);
     const payload = {
       taskId: taskId,
       updateFields: {
