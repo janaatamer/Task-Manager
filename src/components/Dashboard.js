@@ -36,7 +36,7 @@ const createTask = async (taskDetails, file) => {
       filename: file.name,  // Get the file name
       file: base64File      // Send base64-encoded file
     };
-
+    console.log("PAYLOAD create:", payload);
     const response = await axios.post(apiUrl, payload, {
       headers: {
         'Content-Type': 'application/json',
@@ -79,40 +79,69 @@ const getTasks = async () => {
 };
 
 const editTask = async (taskId, updatedTaskDetails) => {
+  // ✅ Define the API URL for updating the task
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
+  
+  // ✅ Fetch the token from localStorage
   const token = localStorage.getItem('authToken');
+  console.log('🔑 Token:', token); // Debugging: Check the token value
 
   try {
-    // Prepare the update fields (e.g., title, dueDate, etc.)
+    // ✅ Prepare the update fields (e.g., title, dueDate, etc.)
     const updateFields = {};
 
     if (updatedTaskDetails.title) {
       updateFields.title = updatedTaskDetails.title;
+      console.log("📝 Title updated:", updatedTaskDetails.title);
     }
     if (updatedTaskDetails.dueDate) {
       updateFields.dueDate = updatedTaskDetails.dueDate;
+      console.log("🗓️ Due Date updated:", updatedTaskDetails.dueDate);
     }
-    // You can add other fields like file if necessary here
 
-    // Create the payload for the request
+    // ✅ Prepare the file if it exists
+    const file = updatedTaskDetails.file || null;
+    const filename = updatedTaskDetails.filename || null;
+
+    // ✅ If there is a file, convert it to base64
+    const toBase64 = (file) =>
+      new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]); // Get base64 string
+        reader.onerror = reject;
+      });
+
+    let base64File = null;
+    if (file) {
+      console.log("📂 File detected, converting to base64...");
+      base64File = await toBase64(file);
+      console.log("✅ File converted to base64 successfully.");
+    }
+
+    // ✅ Create the payload for the request
     const payload = {
       taskId: taskId,
-      updateFields: updateFields,  // Send updateFields instead of taskDetails
-      file: updatedTaskDetails.file || null,  // Send file if it exists
-      filename: updatedTaskDetails.filename || null,  // Send filename if it exists
+      updateFields: updateFields,
+      file: base64File,
+      filename: filename,
+      Token: token, // 🔥 Include the token in the body payload as expected by Lambda
     };
+    console.log("📦 Payload for update:", payload);
 
-    // Send the request to the API with headers and payload
+    // ✅ Send the request to the API with headers and payload
     const response = await axios.put(apiUrl, payload, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
       },
     });
 
-    console.log('Task updated:', response.data);
+    // ✅ Log the successful response
+    console.log('✅ Task updated successfully:', response.data);
+
   } catch (error) {
-    console.error('Error editing task:', error.response?.data || error.message);
+    // ✅ Log the error response if it occurs
+    console.error('❌ Error editing task:', error.response?.data || error.message);
   }
 };
 
@@ -162,30 +191,40 @@ const editTask = async (taskId, updatedTaskDetails) => {
   }
 };
 
-  // ✅ DELETE TASK FUNCTION
-const deleteTask = async (taskId) => {
-  const apiUrl = `https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks/?taskId=${taskId}`;
+ const deleteTask = async (taskId) => {
+  const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
 
-
+  // Fetch the token from localStorage
   const token = localStorage.getItem('authToken');
+  console.log('Token:', token); // Debugging: Check the token value
+  if (!token) {
+    console.error('No authorization token found.');
+    return;
+  }
+
   try {
+    // Prepare the request payload
+    const payload = {
+      taskId: taskId,
+      Token: token
+    };
+    console.log("PAYLOAD:", payload);
+    // Send the DELETE request with headers and payload
     const response = await axios.delete(apiUrl, {
       headers: {
         'Content-Type': 'application/json',
-         'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${token}`,
       },
+      data: payload,  // 👈 Send taskId in the `data` field instead of query params
     });
 
-      console.log('Task deleted:', response.data);
+    console.log('Task deleted:', response.data);
+  
+  } catch (error) {
+    console.error('Error deleting task:', error.response?.data || error.message);
+  }
+};
 
-      // Refresh the task list
-    //  const updatedTasks = await getTasks();
-    //  setTasks(JSON.parse(updatedTasks.body));
-
-    } catch (error) {
-      console.error('Error deleting task:', error.response?.data || error.message);
-    }
-  };
   useEffect(() => {
     console.log('Updated tasks:', tasks); // This logs when tasks state changes
     console.log('Is tasks an array?', Array.isArray(tasks)); // Check if it's an array
@@ -263,6 +302,7 @@ return (
   onClick={async () => {
     if (window.confirm("Are you sure you want to delete this task?")) {
       await deleteTask(task.taskId);
+      
     //  setTasks(prevTasks => prevTasks.filter(t => t.taskId !== task.taskId));
     }
   }}
