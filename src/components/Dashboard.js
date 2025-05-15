@@ -18,7 +18,7 @@ const createTask = async (taskDetails, file) => {
   
   // Assuming the token is stored in localStorage or cookies
   const token = localStorage.getItem('authToken');  
-
+  console.log('🔑 Token:', token); // Debugging: Check the token value
   const toBase64 = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -54,7 +54,7 @@ const createTask = async (taskDetails, file) => {
 const getTasks = async () => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
   const token = localStorage.getItem('authToken');
-
+   
   try {
    // console.log('tokenn', token);
     const response = await axios.get(apiUrl, {
