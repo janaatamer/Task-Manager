@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signUp, confirmSignUp } from 'aws-amplify/auth';
 import '../style.css';
+import axios from 'axios';
 
 function Signup() {
     const navigate = useNavigate();
@@ -33,13 +34,16 @@ function Signup() {
 
             console.log('Signup result:', { isSignUpComplete, userId, nextStep });
             
+            
             if (nextStep.signUpStep === 'CONFIRM_SIGN_UP') {
-                setShowConfirmation(true);
+                setShowConfirmation(true);                
                 alert('Confirmation code sent to your email');
+
             }
         } catch (error) {
             console.error('Signup error:', error);
             setError(error.message || 'Signup failed');
+
         } finally {
             setIsLoading(false);
         }
@@ -55,11 +59,16 @@ function Signup() {
                 username: email,
                 confirmationCode
             });
-
+            const payload = {
+                name:name,
+                email:email,
+            };
             if (isSignUpComplete) {
+                await axios.post('https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/users', payload);
                 alert('Account confirmed successfully! You can now log in.');
                 navigate('/login');
-            }
+                }
+
         } catch (error) {
             console.error('Confirmation error:', error);
             setError(error.message || 'Confirmation failed');

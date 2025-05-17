@@ -13,6 +13,8 @@ function Dashboard() {
   title: '',
   dueDate: ''
 });
+  const [token,setToken] = useState('');
+
 const createTask = async (taskDetails, file) => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
   
@@ -43,6 +45,8 @@ const createTask = async (taskDetails, file) => {
         'Authorization': `Bearer ${token}`,
       },
     });
+    // const fetchedTasks = await getTasks();
+    // setTasks(fetchedTasks.body)
 
     console.log('Task created:', response.data);
   } catch (error) {
@@ -56,18 +60,16 @@ const getTasks = async () => {
   const token = localStorage.getItem('authToken');
    
   try {
-   // console.log('tokenn', token);
-    const response = await axios.get(apiUrl, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-        // Only add Authorization if token exists
-        // ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        
-      },
-      // Optional: To be safe with CORS preflight
-      withCredentials: false
-    });
+    const token = localStorage.getItem('authToken');
+    console.log("Token",token)
+    const response = await axios.get(`${apiUrl}?token=${token}`, {
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  }
+});
+
+
 
     console.log('Tasks fetched:', response.data);
     return response.data;
@@ -149,10 +151,13 @@ const editTask = async (taskId, updatedTaskDetails) => {
 
   useEffect(() => {
     const fetchTasks = async () => {
+      const token = localStorage.getItem('authToken');
+      setToken(token);
       const fetchedTasks = await getTasks();
-      console.log('Fetched Tasks:', fetchedTasks); // Debugging: Check the full fetched data
+      console.log('Fetched Tasks1:', fetchedTasks.body); // Debugging: Check the full fetched data
       // Parse the 'body' as it is returned as a JSON string
       const parsedTasks = JSON.parse(fetchedTasks.body); // Parse the string to an array
+      console.log("parsed",parsedTasks)
       setTasks(parsedTasks); // Set the parsed array to state
     };
 
@@ -162,9 +167,10 @@ const editTask = async (taskId, updatedTaskDetails) => {
 
   const updateTaskStatus = async (taskId, newStatus) => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
-  const token = localStorage.getItem('authToken');
+ // const token = localStorage.getItem('authToken');
 
   try {
+    console.log(token);
     const payload = {
       taskId: taskId,
       updateFields: {
@@ -278,7 +284,7 @@ return (
       {/* ✅ Task List */}
       <div className="task-list">
         {Array.isArray(tasks) && tasks.map((task, index) => {
-          const details = JSON.parse(task.taskDetails);
+          const details = (task.taskDetails);
           return (
             <div className="task-card" key={task.taskId || index}>
               <div className="task-header">
@@ -303,7 +309,7 @@ return (
     if (window.confirm("Are you sure you want to delete this task?")) {
       await deleteTask(task.taskId);
       
-    //  setTasks(prevTasks => prevTasks.filter(t => t.taskId !== task.taskId));
+      setTasks(prevTasks => prevTasks.filter(t => t.taskId !== task.taskId));
     }
   }}
 >
@@ -367,6 +373,7 @@ return (
             };
             const file = e.target['task-attachments'].files[0];
             createTask(taskDetails, file);
+            
           }}>
             <div className="form-group">
               <label htmlFor="task-title">Title</label>
