@@ -17,9 +17,16 @@ function Dashboard() {
 
 const createTask = async (taskDetails, file) => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
+
+  
   
   // Assuming the token is stored in localStorage or cookies
   const token = localStorage.getItem('authToken');  
+  
+
+  
+
+
   console.log('🔑 Token:', token); // Debugging: Check the token value
   const toBase64 = (file) =>
     new Promise((resolve, reject) => {
@@ -57,22 +64,36 @@ const createTask = async (taskDetails, file) => {
 
 const getTasks = async () => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
-  const token = localStorage.getItem('authToken');
+  //const token = localStorage.getItem('authToken');
    
   try {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('userEmail');
+    const token2= localStorage.getItem('authToken');
+    if (!token) {
+      console.error('No token found in localStorage');
+      return [];
+    }
     console.log("Token",token)
+    console.log("Token",token2)
     const response = await axios.get(`${apiUrl}?token=${token}`, {
   headers: {
+    'Authorization': `Bearer ${token2}`,
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
+    
   }
-});
+}
+// const response = await axios.get(apiUrl, {
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${token}`,
+//       },
+//     }
+ );
 
 
 
     console.log('Tasks fetched:', response.data);
-    return response.data;
+    return response.data || [];
 
   } catch (error) {
     console.error('Error fetching tasks:', error.response?.data || error.message);
@@ -85,7 +106,8 @@ const editTask = async (taskId, updatedTaskDetails) => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
   
   // ✅ Fetch the token from localStorage
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('userEmail');
+  const token2 = localStorage.getItem('authToken'); 
   console.log('🔑 Token:', token); // Debugging: Check the token value
 
   try {
@@ -135,6 +157,7 @@ const editTask = async (taskId, updatedTaskDetails) => {
     const response = await axios.put(apiUrl, payload, {
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token2}`, // 🔥 Include the token in the headers
       },
     });
 
@@ -151,12 +174,14 @@ const editTask = async (taskId, updatedTaskDetails) => {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      const token = localStorage.getItem('authToken');
-      setToken(token);
+      // const token = localStorage.getItem('authToken');
+      // setToken(token);
+      // console.log('Token:', token); // Debugging: Check the token value
       const fetchedTasks = await getTasks();
       console.log('Fetched Tasks1:', fetchedTasks.body); // Debugging: Check the full fetched data
       // Parse the 'body' as it is returned as a JSON string
-      const parsedTasks = JSON.parse(fetchedTasks.body); // Parse the string to an array
+      // const parsedTasks = JSON.parse(fetchedTasks.body); // Parse the string to an array
+      const parsedTasks = fetchedTasks;
       console.log("parsed",parsedTasks)
       setTasks(parsedTasks); // Set the parsed array to state
     };
@@ -201,7 +226,8 @@ const editTask = async (taskId, updatedTaskDetails) => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
 
   // Fetch the token from localStorage
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('userEmail');
+  const token2 = localStorage.getItem('authToken');
   console.log('Token:', token); // Debugging: Check the token value
   if (!token) {
     console.error('No authorization token found.');
@@ -219,7 +245,7 @@ const editTask = async (taskId, updatedTaskDetails) => {
     const response = await axios.delete(apiUrl, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${token2}`,
       },
       data: payload,  // 👈 Send taskId in the `data` field instead of query params
     });

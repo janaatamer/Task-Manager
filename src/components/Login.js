@@ -1,7 +1,22 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signIn, getCurrentUser, signOut } from 'aws-amplify/auth';
+import { signIn, getCurrentUser, signOut, fetchAuthSession} from 'aws-amplify/auth';
 import '../style.css';
+
+function parseJwt(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split('')
+      .map((c) => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join('')
+  );
+
+  return JSON.parse(jsonPayload);
+}
 
 function Login() {
     const [email, setEmail] = useState('');
@@ -22,14 +37,29 @@ function Login() {
                 const user = await getCurrentUser();
                 console.log('User already authenticated:', user);
                 
+                
                 // If the authenticated user is different from the one trying to log in
                 if (user.signInDetails.loginId !== email) {
                     await signOut(); // Sign out the current user
+                    localStorage.clear();
+                    
                     console.log('Signed out previous user');
                 } else {
                     // Same user, just redirect to dashboard
-                    localStorage.setItem('authToken', user.signInDetails.loginId);
-                    console.log('same user:', user.signInDetails.loginId)
+                    //localStorage.setItem('authToken', user.signInDetails.loginId);
+                    const session = await fetchAuthSession();
+const token = session.tokens?.idToken?.toString();
+// localStorage.setItem('authToken', token);
+//                     console.log('same user:', user.signInDetails.loginId)
+//                     console.log('same user:', token)
+if (token) {
+  localStorage.setItem('authToken', token);
+  const decoded = parseJwt(token);
+  const email = decoded.email;
+  localStorage.setItem('userEmail', user.signInDetails.loginId);
+  console.log('User email:', email);
+  
+}
                     navigate('/dashboard');
                     return;
                 }
@@ -49,8 +79,12 @@ function Login() {
             // Get the current user after successful sign in
             const user = await getCurrentUser();
             if (user) {
-                localStorage.setItem('authToken', user.signInDetails.loginId);
-                console.log('another user',user.signInDetails.loginId)
+                const session = await fetchAuthSession();
+const token = session.tokens?.idToken?.toString();
+localStorage.setItem('authToken', token);
+                //localStorage.setItem('authToken', user.signInDetails.loginId);
+                //console.log('another user',user.signInDetails.loginId)
+                console.log('another user',token)
                 
                 // Handle special cases
                 if (nextStep.signInStep === 'CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED') {
