@@ -14,37 +14,33 @@ function Dashboard() {
   dueDate: ''
 });
   const [token,setToken] = useState('');
+   const [file, setFile] = useState(null);
 
 const createTask = async (taskDetails, file) => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
-
-  
-  
-  // Assuming the token is stored in localStorage or cookies
-  const token = localStorage.getItem('authToken');  
-  
-
-  
-
-
-  console.log('🔑 Token:', token); // Debugging: Check the token value
-  const toBase64 = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result.split(',')[1]); // Get base64 string
-      reader.onerror = reject;
-    });
+  const token = localStorage.getItem('authToken');
 
   try {
-    // Convert the file to base64
-    const base64File = await toBase64(file);
+    let payload = { task: taskDetails };
 
-    const payload = {
-      task: taskDetails,
-      filename: file.name,  // Get the file name
-      file: base64File      // Send base64-encoded file
-    };
+    if (file) {
+      const toBase64 = (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = reject;
+        });
+
+      // Convert the file to base64 if present
+      const base64File = await toBase64(file);
+      payload = {
+        ...payload,
+        filename: file.name,
+        file: base64File
+      };
+    }
+
     console.log("PAYLOAD create:", payload);
     const response = await axios.post(apiUrl, payload, {
       headers: {
@@ -52,15 +48,15 @@ const createTask = async (taskDetails, file) => {
         'Authorization': `Bearer ${token}`,
       },
     });
-    const fetchedTasks = await getTasks();
-    setTasks(fetchedTasks)
-   
 
+    const fetchedTasks = await getTasks();
+    setTasks(fetchedTasks);
     console.log('Task created:', response.data);
   } catch (error) {
     console.error('Error creating task:', error);
   }
 };
+
 
 
 const getTasks = async () => {
@@ -390,21 +386,23 @@ return (
     </main>
 
     {/* Add Task Modal */}
-    <div id="add-task-modal" className="modal">
+  <div id="add-task-modal" className="modal">
       <div className="modal-content">
         <div className="modal-header">
           <h2>Add New Task</h2>
           <a href="#" className="close-modal">&times;</a>
         </div>
         <div className="modal-body">
-          <form onSubmit={(e) => {
+          <form onSubmit={async (e) => {
             e.preventDefault();
             const taskDetails = {
               title: e.target['task-title'].value,
               dueDate: e.target['task-due-date'].value,
             };
-            const file = e.target['task-attachments'].files[0];
-            createTask(taskDetails, file);
+
+            await createTask(taskDetails, file);
+            setFile(null); // Clear the file state after submission
+            document.getElementById('task-attachments').value = ""; // Clear the input
           }}>
             <div className="form-group">
               <label htmlFor="task-title">Title</label>
@@ -417,12 +415,32 @@ return (
             <div className="form-group">
               <label htmlFor="task-attachments">Attachments</label>
               <div className="file-upload">
-                <input type="file" id="task-attachments" />
+                <input 
+                  type="file" 
+                  id="task-attachments" 
+                  onChange={(e) => setFile(e.target.files[0])} 
+                />
                 <label htmlFor="task-attachments" className="file-upload-label">
                   <i className="fa-solid fa-paperclip"></i> Choose file
                 </label>
               </div>
+
+              {file && (
+                <div className="file-info">
+                  <span>{file.name}</span>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setFile(null); // Clear the state
+                      document.getElementById('task-attachments').value = ""; // Clear the input
+                    }} 
+                    className="btn btn-secondary">
+                    Remove Attachment
+                  </button>
+                </div>
+              )}
             </div>
+
             <div className="form-actions">
               <a href="#" className="btn btn-secondary">Cancel</a>
               <button type="submit" className="btn btn-primary">Add Task</button>
@@ -431,7 +449,7 @@ return (
         </div>
       </div>
     </div>
-
+    
     {/* Edit Task Modal */}
     <div id="edit-task-modal" className="modal">
       <div className="modal-content">
