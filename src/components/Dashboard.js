@@ -52,8 +52,9 @@ const createTask = async (taskDetails, file) => {
         'Authorization': `Bearer ${token}`,
       },
     });
-    // const fetchedTasks = await getTasks();
-    // setTasks(fetchedTasks.body)
+    const fetchedTasks = await getTasks();
+    setTasks(fetchedTasks)
+   
 
     console.log('Task created:', response.data);
   } catch (error) {
@@ -151,6 +152,7 @@ const editTask = async (taskId, updatedTaskDetails) => {
       filename: filename,
       Token: token, // 🔥 Include the token in the body payload as expected by Lambda
     };
+    console.log("file",file)
     console.log("📦 Payload for update:", payload);
 
     // ✅ Send the request to the API with headers and payload
@@ -178,7 +180,7 @@ const editTask = async (taskId, updatedTaskDetails) => {
       // setToken(token);
       // console.log('Token:', token); // Debugging: Check the token value
       const fetchedTasks = await getTasks();
-      console.log('Fetched Tasks1:', fetchedTasks.body); // Debugging: Check the full fetched data
+      console.log('Fetched Tasks1:', fetchedTasks); // Debugging: Check the full fetched data
       // Parse the 'body' as it is returned as a JSON string
       // const parsedTasks = JSON.parse(fetchedTasks.body); // Parse the string to an array
       const parsedTasks = fetchedTasks;
@@ -192,13 +194,17 @@ const editTask = async (taskId, updatedTaskDetails) => {
 
   const updateTaskStatus = async (taskId, newStatus) => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
- // const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem('userEmail');
+  const token2 = localStorage.getItem('authToken'); 
+  console.log('🔑 Token:', token); // Debugging: Check the token value
 
   try {
     console.log(token);
     const payload = {
       taskId: taskId,
+      Token: token,
       updateFields: {
+        
         isDone: newStatus,  // Update isDone to the new status
       },
     };
@@ -206,7 +212,7 @@ const editTask = async (taskId, updatedTaskDetails) => {
     const response = await axios.put(apiUrl, payload, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${token2}`,
       },
     });
 
@@ -214,8 +220,8 @@ const editTask = async (taskId, updatedTaskDetails) => {
     
     // After updating the task status, fetch the updated tasks
     const updatedTasks = await getTasks();  // This is the function to get all tasks
-    setTasks(JSON.parse(updatedTasks.body));  // Update tasks state with the new data
-    console.log(JSON.parse(updatedTasks.body));
+    setTasks((updatedTasks));  // Update tasks state with the new data
+    console.log((updatedTasks));
 
   } catch (error) {
     console.error('Error updating task status:', error);
@@ -323,25 +329,25 @@ return (
                       setTaskToEdit(task);
                       setEditFormData({
                         title: details.title || '',
-                        dueDate: details.dueDate || ''
+                        dueDate: details.dueDate || '',
+                        file: null, // reset file input
+                        oldFilename: task.filename // store old filename if available
                       });
                     }}
                   >
                     <i className="fa-solid fa-pen-to-square"></i>
                   </a>
-                 <button
-  className="delete-btn"
-  onClick={async () => {
-    if (window.confirm("Are you sure you want to delete this task?")) {
-      await deleteTask(task.taskId);
-      
-      setTasks(prevTasks => prevTasks.filter(t => t.taskId !== task.taskId));
-    }
-  }}
->
-  <i className="fa-solid fa-trash"></i>
-</button>
-
+                  <button
+                    className="delete-btn"
+                    onClick={async () => {
+                      if (window.confirm("Are you sure you want to delete this task?")) {
+                        await deleteTask(task.taskId);
+                        setTasks(prevTasks => prevTasks.filter(t => t.taskId !== task.taskId));
+                      }
+                    }}
+                  >
+                    <i className="fa-solid fa-trash"></i>
+                  </button>
                 </div>
               </div>
               <div className="task-details">
@@ -399,7 +405,6 @@ return (
             };
             const file = e.target['task-attachments'].files[0];
             createTask(taskDetails, file);
-            
           }}>
             <div className="form-group">
               <label htmlFor="task-title">Title</label>
@@ -442,10 +447,12 @@ return (
                 const updatedTask = {
                   title: editFormData.title,
                   dueDate: editFormData.dueDate,
+                  file: editFormData.file, // include file in update
+                  filename: editFormData.file ? editFormData.file.name : editFormData.oldFilename
                 };
                 await editTask(taskToEdit.taskId, updatedTask);
                 const updatedTasks = await getTasks();
-                setTasks(JSON.parse(updatedTasks.body));
+                setTasks((updatedTasks));
                 setTaskToEdit(null);
               }}
             >
@@ -481,6 +488,13 @@ return (
                     setEditFormData({ ...editFormData, file: e.target.files[0] })
                   }
                 />
+                {/* Show old file name if exists and no new file selected
+                {!editFormData.file && (
+                  <div className="old-filename">
+                    <small>Current file: {taskToEdit.filename}</small>
+                  </div>
+                )} */}
+
               </div>
               <div className="form-actions">
                 <a href="#" className="btn btn-secondary" onClick={() => setTaskToEdit(null)}>Cancel</a>
