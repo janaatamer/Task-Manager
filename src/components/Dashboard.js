@@ -15,6 +15,12 @@ function Dashboard() {
 });
   const [token,setToken] = useState('');
    const [file, setFile] = useState(null);
+   const [isModalOpen, setIsModalOpen] = useState(false);
+const [refreshKey, setRefreshKey] = useState(0); // Used to trigger refresh
+
+const refreshDashboard = () => {
+  setRefreshKey(prev => prev + 1); // This will trigger useEffect to refetch tasks
+};
 
 const createTask = async (taskDetails, file) => {
   const apiUrl = 'https://scfwc7ifpa.execute-api.us-east-1.amazonaws.com/dev/tasks';
@@ -271,43 +277,28 @@ const editTask = async (taskId, updatedTaskDetails) => {
 return (
   <div className="dashboard">
     {/* Navbar */}
-    <nav className="navbar">
-      <div className="logo">
-        <h1>TaskManager</h1>
-      </div>
-      <div className="nav-links">
-        <div className="notification">
-          <i className="fa-solid fa-bell"></i>
-          <span className="notification-badge">3</span>
-        </div>
-        <div className="profile">
-          <img src="" alt="Profile" />
-          <div className="profile-dropdown">
-            <div className="profile-info">
-              <img src="" alt="Profile" />
-              <div>
-                <h3>John Doe</h3>
-                <p>john.doe@example.com</p>
-              </div>
-            </div>
-            <ul>
-              <li><a href="#"><i className="fa-solid fa-user"></i> My Profile</a></li>
-              <li><a href="#"><i className="fa-solid fa-gear"></i> Settings</a></li>
-              <li><a href="#"><i className="fa-solid fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </nav>
-
-    {/* Main Content */}
-    <main className="container">
-      <div className="header">
-        <h1>My Tasks</h1>
+  <nav className="navbar">
+  <div className="logo">
+    <h1>TaskManager</h1>
+  </div>
+    <h1>My Tasks</h1>
+   <div className="header">
+       
         <a href="#add-task-modal" className="btn add-task-btn">
           <i className="fa-solid fa-plus"></i> Add New Task
         </a>
       </div>
+</nav>
+
+    {/* Main Content */}
+    <main className="container">
+     
+      {/* <div className="header">
+        <h1>My Tasks</h1>
+        <a href="#add-task-modal" className="btn add-task-btn">
+          <i className="fa-solid fa-plus"></i> Add New Task
+        </a>
+      </div> */}
 
       {/* ✅ Task List */}
       <div className="task-list">
@@ -393,17 +384,23 @@ return (
           <a href="#" className="close-modal">&times;</a>
         </div>
         <div className="modal-body">
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            const taskDetails = {
-              title: e.target['task-title'].value,
-              dueDate: e.target['task-due-date'].value,
-            };
+        <form onSubmit={async (e) => {
+  e.preventDefault();
+  const taskDetails = {
+    title: e.target['task-title'].value,
+    dueDate: e.target['task-due-date'].value,
+  };
 
-            await createTask(taskDetails, file);
-            setFile(null); // Clear the file state after submission
-            document.getElementById('task-attachments').value = ""; // Clear the input
-          }}>
+  try {
+    await createTask(taskDetails, file);
+    setFile(null);
+    document.getElementById('task-attachments').value = "";
+    document.getElementById('add-task-modal').style.display = 'none'; // Hide modal
+    window.location.reload(); // Refresh the page
+  } catch (error) {
+    console.error("Error creating task:", error);
+  }
+}}>
             <div className="form-group">
               <label htmlFor="task-title">Title</label>
               <input type="text" id="task-title" required />
@@ -425,26 +422,35 @@ return (
                 </label>
               </div>
 
-              {file && (
-                <div className="file-info">
-                  <span>{file.name}</span>
-                  <button 
-                    type="button" 
-                    onClick={() => {
-                      setFile(null); // Clear the state
-                      document.getElementById('task-attachments').value = ""; // Clear the input
-                    }} 
-                    className="btn btn-secondary">
-                    Remove Attachment
-                  </button>
-                </div>
-              )}
+          {file && (
+  <div className="file-info">
+    <span>{file.name}</span>
+    <button 
+      type="button" 
+      onClick={() => {
+        setFile(null);
+        document.getElementById('task-attachments').value = "";
+      }} 
+      className="remove-attachment-btn "
+    >
+      <i className="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+)}
             </div>
 
-            <div className="form-actions">
-              <a href="#" className="btn btn-secondary">Cancel</a>
-              <button type="submit" className="btn btn-primary">Add Task</button>
-            </div>
+         <div className="form-actions">
+  <button 
+    type="button" 
+    className="btn btn-secondary"
+    onClick={() => {
+      document.getElementById('add-task-modal').style.display = 'none';
+    }}
+  >
+    Cancel
+  </button>
+  <button type="submit" className="add-task-btn">Add Task</button>
+</div>
           </form>
         </div>
       </div>
@@ -516,11 +522,11 @@ return (
               </div>
               <div className="form-actions">
                 <a href="#" className="btn btn-secondary" onClick={() => setTaskToEdit(null)}>Cancel</a>
-                <button type="submit" className="btn btn-primary">Save Changes</button>
+                <button type="submit" className="add-task-btn">Save Changes</button>
               </div>
             </form>
           ) : (
-            <p>No task selected</p>
+            <p>Task is updated successfully</p>
           )}
         </div>
       </div>

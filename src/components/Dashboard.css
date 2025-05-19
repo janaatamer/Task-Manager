@@ -27,7 +27,7 @@ html, body, #root {
 }
 
 .logo h1 {
-  color: #4a6cf7;
+  color: #394883;
 }
 
 .nav-links {
@@ -59,19 +59,19 @@ html, body, #root {
   align-items: center;
   justify-content: center;
 }
-
+/* 
 .profile {
   position: relative;
-}
+} */
 
-.profile img {
+/* .profile img {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   border: 2px solid #4a6cf7;
-}
+} */
 
-.profile-dropdown {
+/* .profile-dropdown {
   position: absolute;
   top: 100%;
   right: 0;
@@ -81,29 +81,29 @@ html, body, #root {
   padding: 1rem;
   border-radius: 8px;
   display: none;
-}
+} */
 
-.profile:hover .profile-dropdown {
+/* .profile:hover .profile-dropdown {
   display: block;
-}
-
+} */
+/* 
 .profile-info {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #eee;
-}
-
+} */
+/* 
 .profile-info img {
   width: 50px;
   height: 50px;
-}
+} */
 
-.profile-info h3 {
+/* .profile-info h3 {
   font-size: 1rem;
-}
-
+} */
+/* 
 .profile-info p {
   font-size: 0.8rem;
   color: #777;
@@ -112,9 +112,9 @@ html, body, #root {
 .profile-dropdown ul {
   list-style: none;
   margin-top: 1rem;
-}
+} */
 
-.profile-dropdown ul li a {
+/* .profile-dropdown ul li a {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -125,13 +125,14 @@ html, body, #root {
 
 .profile-dropdown ul li a:hover {
   color: #4a6cf7;
-}
+} */
 
 /* Layout */
 .page-container {
   width: 100%;
   padding: 2rem 4rem;
 }
+
 
 /* Header */
 .header {
@@ -158,12 +159,25 @@ html, body, #root {
 }
 
 .add-task-btn {
-  background-color: #4a6cf7;
+  padding: 8px 12px;  /* Reduced from 14px */
+  background-color: #3c6a94;
   color: white;
+  border: none;
+  border-radius: 6px;  /* Reduced from 8px */
+  font-size: 14px;    /* Reduced from 16px */
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;           /* Reduced from 8px */
+  width: auto;        /* Changed from 100% to auto for navbar */
+  min-width: 120px;   /* Added to ensure minimum width */
 }
 
 .add-task-btn:hover {
-  background-color: #3a5bd9;
+  background-color: #465079;
 }
 
 /* Task Cards */
@@ -203,6 +217,15 @@ html, body, #root {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+}
+.modal {
+ display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+}
+
+.modal.show {
+  display: block;
 }
 
 .task-header h3 {
@@ -257,6 +280,76 @@ html, body, #root {
   padding-top: 1rem;
   border-top: 1px solid #eee;
 }
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.remove-attachment-btn {
+  background: none;
+  border: none;
+  color: #dc3545; /* Red color */
+  cursor: pointer;
+  padding: 2px;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+/* This completely removes any hover effects */
+.remove-attachment-btn:hover {
+  background: none;
+  transform: none;
+  color: inherit;
+}
+
+  
+.task-actions {
+  display: flex;
+  gap: 8px; /* Space between buttons */
+  align-items: center; /* Vertically align buttons */
+}
+
+.edit-btn, .delete-btn {
+  background: none;
+  border: none;
+  color: #6b7280; /* Default gray color */
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.edit-btn:hover {
+  color: #3b82f6; /* Blue on hover */
+}
+
+.delete-btn:hover {
+  color: #ef4444; /* Red on hover */
+}
+
+/* If you want the buttons to look more clickable */
+.edit-btn, .delete-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.edit-btn:hover {
+  background-color: #eff6ff; /* Light blue background */
+}
+
+.delete-btn:hover {
+  background-color: #fef2f2; /* Light red background */
+}
+
 
 /* Checkbox */
 .checkbox-container {
@@ -316,8 +409,7 @@ html, body, #root {
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
-
-/* Modal */
+/* Modal Container */
 .modal {
   position: fixed;
   top: 0;
@@ -331,7 +423,8 @@ html, body, #root {
   z-index: 1000;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(4px);
 }
 
 .modal:target {
@@ -341,151 +434,255 @@ html, body, #root {
 
 .modal-content {
   background-color: white;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 90%;
-  max-width: 500px;
+   left: 50px;
+  max-width: 520px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  animation: modalFadeIn 0.3s;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  animation: modalSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+   
+  
 }
 
-@keyframes modalFadeIn {
+@keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(70px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(50px);
   }
 }
 
+/* Modal Header */
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid #eee;
+  padding: 1.5rem 1.5rem 1rem;
+  position: relative;
 }
 
 .modal-header h2 {
   font-size: 1.5rem;
-  color: #333;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
 }
 
 .close-modal {
-  font-size: 1.8rem;
-  color: #777;
-  transition: color 0.3s;
+  font-size: 1.5rem;
+  color: #64748b;
+  transition: all 0.2s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin: -0.5rem;
+  border-radius: 50%;
 }
 
 .close-modal:hover {
-  color: #ff5757;
+  color: #1e293b;
+  background-color: #f1f5f9;
 }
 
+/* Modal Body */
+
 .modal-body {
-  padding: 1.5rem;
+ padding: 0 1.5rem 1.5rem;
+  margin-right: 0px;
+  /* Add these new properties: */
+  position: relative;
+  right: -30px;       /* Move right by 30px */
+  top: -7px;         /* Move up by 20px */
+  /* transform: translateX(30px) translateY(-10px);  */
+  /* Smooth movement */
 }
 
 /* Form Styles */
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
+  
+  
 }
 
 .form-group label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: #555;
+  color: #334155;
+  font-size: 0.9375rem;
+  
 }
 
-.form-group input[type="text"],
-.form-group input[type="date"] {
+.form-input {
   width: 100%;
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   font-size: 1rem;
+  transition: all 0.2s ease;
+  background-color: #f8fafc;
 }
 
-.form-group input[type="text"]:focus,
-.form-group input[type="date"]:focus {
+.form-input:focus {
   outline: none;
-  border-color: #4a6cf7;
-  box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.2);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background-color: white;
+}
+
+/* File Upload */
+.file-upload-container {
+  margin-top: 0.5rem;
 }
 
 .file-upload {
   position: relative;
-  margin-bottom: 1rem;
+  border: 2px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.file-upload:hover {
+  border-color: #94a3b8;
+  background-color: #f8fafc;
 }
 
 .file-upload input[type="file"] {
   position: absolute;
   top: 0;
   left: 0;
-  opacity: 0;
   width: 100%;
   height: 100%;
+  opacity: 0;
   cursor: pointer;
 }
 
 .file-upload-label {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  background-color: #f1f1f1;
-  color: #555;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  gap: 0.75rem;
+  color: #64748b;
 }
 
-.file-upload-label:hover {
-  background-color: #e1e1e1;
+.file-upload-icon {
+  font-size: 1.5rem;
+  color: #3b82f6;
 }
 
-.selected-files {
+.file-upload-text {
+  font-size: 0.9375rem;
+}
+
+.file-upload-hint {
+  font-size: 0.8125rem;
+  color: #94a3b8;
   margin-top: 0.5rem;
-  font-size: 0.9rem;
-  color: #777;
 }
+
+/* File Preview */
+.file-preview {
+  display: flex;
+  align-items: center;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+}
+
+.file-preview-icon {
+  color: #64748b;
+  margin-right: 0.75rem;
+}
+
+.file-preview-name {
+  flex: 1;
+  font-size: 0.9375rem;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-preview-remove {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 0.25rem;
+  border-radius: 4px;
+}
+
+.file-preview-remove:hover {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Form Actions */
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f1f5f9;
+  
 }
 
-/* Current Attachments */
-.current-attachments {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.current-attachments .attachment-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f1f5ff;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-}
-
-.remove-attachment {
-  background: none;
-  border: none;
-  color: #777;
+.btn {
+  padding: 0.6875rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9375rem;
   cursor: pointer;
-  transition: color 0.3s;
+  transition: all 0.2s ease;
 }
 
-.remove-attachment:hover {
-  color: #ff5757;
+.btn-secondary {
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.btn-secondary:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+  .modal-content {
+    width: 95%;
+  }
+  
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .btn {
+    width: 100%;
+  }
 }
 
 /* Responsive Styles */

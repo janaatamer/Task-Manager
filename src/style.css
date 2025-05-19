@@ -81,6 +81,204 @@ button:active {
     transform: scale(0.98); /* Subtle effect on button press */
 }
 
+
+
+
+/* Container Styles */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    padding: 20px;
+}
+
+.auth-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+/* Header Styles */
+.auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #203141;
+    margin-bottom: 8px;
+}
+
+.auth-subtitle {
+    color: #718096;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Form Styles */
+.auth-form {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.input-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s;
+    background-color: #f8fafc;
+}
+
+.auth-input:focus {
+    outline: none;
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+}
+
+/* Password Input Styles */
+.password-input {
+  position: relative;
+}
+
+.password-input input {
+  padding-right: 40px; /* Make space for the eye icon */
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 40%; /* Changed from 50% to move it up */
+  transform: translateY(-50%); /* Keep this for fine-tuning */
+  /* Rest of your existing styles */
+  background: none;
+  border: none;
+  color: #718096;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+  height: 24px;
+  width: 24px;
+}
+
+.password-toggle:hover {
+  background-color: #f1f5f9;
+}
+
+.password-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.password-toggle:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Button Styles */
+.auth-button {
+    width: 100%;
+    padding: 14px;
+    background-color: #3c6a94;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.auth-button:hover {
+    background-color: #2c5282;
+}
+
+.auth-button:disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+}
+
+.auth-button.loading {
+    background-color: #3182ce;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Footer Styles */
+.auth-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.footer-link {
+    color: #3182ce;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.footer-link:hover {
+    text-decoration: underline;
+}
+
+.divider {
+    color: #cbd5e0;
+}
+
+/* Error Styles */
+.auth-error {
+    color: #e53e3e;
+    background-color: #fff5f5;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    border: 1px solid #fed7d7;
+}
+
+
+
 /* Responsive Design for Smaller Screens */
 @media (max-width: 480px) {
     form {
