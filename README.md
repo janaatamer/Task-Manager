@@ -1,70 +1,140 @@
-# Getting Started with Create React App
+# 🚀 Task Management System – Frontend Deployment Guide (AWS EC2)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This guide provides full deployment instructions for hosting the frontend of the Task Management System on AWS EC2 using Amazon Linux 2 and Apache HTTP Server.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## ✅ Prerequisites
 
-### `npm start`
+Before deploying the application, the following AWS services must be configured:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 1. 🔐 Authentication
+- **Amazon Cognito** handles user sign-up/sign-in and issues tokens for authorization.
+- Cognito is integrated with **API Gateway** for secured access.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 2. 🛠️ Backend Infrastructure & Databases
+- **API Gateway** exposes secure RESTful endpoints.
+- **AWS Lambda** handles backend logic and interacts with:
+  - **Amazon RDS (PostgreSQL)** — stores user profiles & task relations (inside a private subnet).
+  - **Amazon DynamoDB** — stores task metadata for fast retrieval.
 
-### `npm test`
+### 3. 🔔 Notifications
+- **Amazon SQS** queues events.
+- **AWS Lambda (SQSNotifier)** processes queued messages and forwards them to:
+- **Amazon SNS**, which delivers user-specific notifications.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 4. 📁 File Storage
+- **Amazon S3** stores user-uploaded attachments.
+- IAM roles control secure access to these files.
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 🧱 Deployment: Frontend Application on AWS EC2 (Amazon Linux 2 + Apache)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 1. 🧩 AWS Infrastructure Setup
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- **VPC**:
+  - **Public Subnet**: Hosts the EC2 instance for frontend.
+  - **Private Subnet**: Hosts the RDS database (no direct internet access).
 
-### `npm run eject`
+- **Route Tables**:
+  - Public Subnet → Internet Gateway (IGW)
+  - Private Subnet → No internet route (more secure)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **Security Groups**:
+  - RDS allows access from EC2 Security Group on port `5432` (PostgreSQL)
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 2. 🖥️ EC2 Instance Setup
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+#### Launch EC2 Instance:
+- AMI: Amazon Linux 2
+- Subnet: Public
+- Enable auto-assigned Public IP
+- Security Group:
+  - Allow inbound **HTTP (80)** from anywhere `0.0.0.0/0`
+  - Allow **SSH (22)** from your local IP only
 
-## Learn More
+#### Connect to EC2 Instance:
+```bash
+ssh -i my-new-key.pem ec2-user@<EC2-Public-IP>
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 3. 🔧 Install Apache HTTP Server
+```bash
+sudo yum update -y
+sudo yum install httpd -y
+sudo systemctl start httpd
+sudo systemctl enable httpd
+```
 
-### Code Splitting
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### 4. ⚙️ Prepare Frontend App for Deployment
 
-### Analyzing the Bundle Size
+On your local machine:
+```bash
+npm run build
+```
+This creates a `build/` folder with static production-ready frontend files.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+---
 
-### Making a Progressive Web App
+### 5. 📤 Upload Frontend Build to EC2
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Using `scp`, transfer build files to EC2:
+```bash
+scp -i my-new-key.pem -r build/* ec2-user@<EC2-Public-IP>:/home/ec2-user/
+```
 
-### Advanced Configuration
+On EC2, run:
+```bash
+sudo rm -rf /var/www/html/*
+sudo cp -r /home/ec2-user/* /var/www/html/
+sudo chown -R apache:apache /var/www/html
+sudo chmod -R 755 /var/www/html
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+#### Purpose of Each Command:
 
-### Deployment
+1.  `rm -rf /var/www/html/*`  
+    → Clears any old files.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+2.  `cp -r /home/ec2-user/* /var/www/html/`  
+    → Copies new frontend build to Apache's root.
 
-### `npm run build` fails to minify
+3.  `chown -R apache:apache /var/www/html`  
+    → Sets Apache as the owner.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+4.  `chmod -R 755 /var/www/html`  
+    → Makes files executable and readable as needed.
+
+---
+
+### 6. 🔁 Restart Apache to Apply Changes
+```bash
+sudo systemctl restart httpd
+```
+
+---
+
+### 7. 🌐 Access the Application
+
+Open your browser and visit:
+```
+http://3.238.42.7/login
+```
+
+The frontend app should load successfully 🎉
+
+---
+
+## ✅ Summary
+
+- ✔️ Fully deployed and running frontend  
+- 🔐 Secured infrastructure with subnet isolation  
+- 📦 Clean file delivery using Apache  
+- 🔁 Easily restartable and maintainable system  
