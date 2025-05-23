@@ -55,7 +55,7 @@ dashboard.
 
 ---
 
-## 4. Creatinf a new Task
+## 4. Creating a new Task
 At the top-right corner of the dashboard, users will find a "Create Task" bu on. Clicking this 
 bu on triggers a pop-up form where the user can: 
 -Enter the Task Title 
