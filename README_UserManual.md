@@ -4,8 +4,8 @@
 This guide provides a full user manual and how to use the web app
 ## Introducion
 Welcome to the Cloud Task Management Applica on. This system is designed to help users 
-efficiently manage, track, and organize their tasks. The pla orm offers intui ve task crea on, 
-edi ng, and monitoring features, along with real-me email no fica ons for all cri cal ac ons.
+efficiently manage, track, and organize their tasks. The platform offers intuitive task creation, 
+editing, and monitoring features, along with real-me email notficaions for all critical actions.
 
 ---
 
@@ -15,8 +15,8 @@ Upon accessing the applica on, users are presented with two primary op ons:
 -Login: If the user has previously registered, they can enter their creden als (email and 
 password) to log in. 
 -Sign Up: New users must navigate to the sign-up page, fill in the required informa on, 
-and create an account. A er successful registra on, the user is redirected to the login 
-page to authen cate and access the applica on.
+and create an account. A er successful registration, the user is redirected to the login 
+page to authenticate and access the application.
 
 ---
 ## 2. Dashboard Overview
@@ -25,14 +25,14 @@ tasks associated with the user in a card-based format.
 Each task card includes: 
 -Task Title 
 -Due Date 
--View File Bu on – Allows users to open the file a ached to the task (if any). 
-Addi onal interac ve op ons are also available on each task card.
+-View File Button – Allows users to open the file a ached to the task (if any). 
+Addi onal interactive op ons are also available on each task card.
 
 ---
 ## 3. Task Management Features
 ### 3.1 view Attached File
 -Clicking the "View File" bu on will open or download the file that was a ached during 
-task crea on or edi ng.
+task crea on or editing.
 ### 3.2 Edit Task
 Each task card contains an "Edit" icon. When clicked: 
 -A form appears, allowing users to: 
@@ -63,7 +63,7 @@ bu on triggers a pop-up form where the user can:
 -Optonally attach a File 
 A er submi ng the form: 
 -The task is added to the dashboard. 
--An email no fica on is sent to the user confirming that the task has been successfully 
+-An email notfication is sent to the user confirming that the task has been successfully 
 created.
 ## Conclusion
 This applica on is built to streamline task management through a user-friendly interface, 
