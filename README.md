@@ -139,6 +139,8 @@ The frontend app should load successfully 🎉
 - 📦 Clean file delivery using Apache  
 - 🔁 Easily restartable and maintainable system  
 
+--------
+
 # User Manual for Task Management Applica on 
 ## Introducion
 Welcome to the Cloud Task Management Applica on. This system is designed to help users 
