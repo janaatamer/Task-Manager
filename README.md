@@ -1,4 +1,4 @@
-Task Management System – Frontend Deployment Guide (AWS EC2)
+Task Management System: Frontend Deployment Guide (AWS EC2)
 
 This guide provides instructions for hosting the frontend of the Task Management System on AWS EC2 using Amazon Linux 2 and Apache HTTP Server.
 
